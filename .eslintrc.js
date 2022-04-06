@@ -47,6 +47,7 @@ module.exports = {
       },
     },
   ],
+  ignorePatterns: ["*.json"],
   rules: {
     'no-sparse-arrays': 'off',
     'import/no-extraneous-dependencies': ['error', { packageDir: './' }],

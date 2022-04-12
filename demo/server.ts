@@ -1,15 +1,21 @@
 /* eslint-disable no-console */
 import express from 'express';
 import path from 'path';
+import dotenv from 'dotenv';
+import { expand } from 'dotenv-expand';
 import payload from '../src';
 
 const expressApp = express();
 
+expand(dotenv.config());
+
 expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static')));
+
+console.log(process.env.DB_URL);
 
 payload.init({
   secret: 'SECRET_KEY',
-  mongoURL: 'mongodb://localhost/payload',
+  mongoURL: process.env.DB_URL,
   express: expressApp,
   email: {
     fromName: 'Payload',

@@ -11,8 +11,6 @@ expand(dotenv.config());
 
 expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static')));
 
-console.log(process.env.DB_URL);
-
 payload.init({
   secret: 'SECRET_KEY',
   mongoURL: process.env.DB_URL,

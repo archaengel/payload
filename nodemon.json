@@ -9,8 +9,8 @@
   ],
   "watch": [
     "src/**/*.ts",
-    "demo/"
+    "pal-demo/"
   ],
   "ext": "ts,js,json",
-  "exec": "node ./demo/index.js"
+  "exec": "node ./pal-demo/index.js"
 }

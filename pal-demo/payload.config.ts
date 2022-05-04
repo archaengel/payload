@@ -1,6 +1,10 @@
+import path from 'path';
 import { buildConfig } from '../src/config/build';
 import Admin from './collections/Admin';
 import PublicUser from './collections/PublicUsers';
+
+import { Logo } from './components/Logo';
+import { Icon } from './components/Icon';
 
 export default buildConfig({
   // By default, Payload will boot up normally
@@ -26,5 +30,17 @@ export default buildConfig({
   ],
   admin: {
     user: 'admins',
+    css: path.resolve(__dirname, 'styles/nav.css'),
+    meta: {
+      titleSuffix: '- Verily CMS',
+      favicon: '/assets/favicon.ico',
+      ogImage: '/assets/baseline.svg',
+    },
+    components: {
+      graphics: {
+        Logo,
+        Icon,
+      },
+    },
   },
 });

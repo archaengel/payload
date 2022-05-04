@@ -9,7 +9,7 @@ const expressApp = express();
 
 expand(dotenv.config());
 
-expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static')));
+expressApp.use('/assets', express.static(path.resolve(__dirname, 'assets')));
 
 payload.init({
   secret: 'SECRET_KEY',

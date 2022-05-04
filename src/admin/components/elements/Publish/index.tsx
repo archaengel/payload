@@ -3,8 +3,9 @@ import FormSubmit from '../../forms/Submit';
 import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useForm, useFormModified } from '../../forms/Form/context';
+import { post } from '../../../../workflows/baseFields';
 
-const Publish: React.FC<Props> = () => {
+const Publish: React.FC<Props> = ({ workflowManaged }) => {
   const { unpublishedVersions, publishedDoc } = useDocumentInfo();
   const { submit } = useForm();
   const modified = useFormModified();
@@ -13,12 +14,18 @@ const Publish: React.FC<Props> = () => {
   const canPublish = modified || hasNewerVersions || !publishedDoc;
 
   const publish = useCallback(() => {
+    const overrides = {
+      _status: 'published',
+    };
+
+    if (workflowManaged) {
+      overrides["_workflow_stage"] = post
+    }
+
     submit({
-      overrides: {
-        _status: 'published',
-      },
+      overrides
     });
-  }, [submit]);
+  }, [submit, workflowManaged]);
 
   return (
     <FormSubmit
@@ -26,7 +33,7 @@ const Publish: React.FC<Props> = () => {
       onClick={publish}
       disabled={!canPublish}
     >
-      Publish changes
+      {`Publish ${workflowManaged ? 'content' : 'changes'}`}
     </FormSubmit>
   );
 };

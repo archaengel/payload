@@ -12,6 +12,7 @@ import { defaults, authDefaults } from './defaults';
 import { Config } from '../../config/types';
 import { versionCollectionDefaults } from '../../versions/defaults';
 import baseVersionFields from '../../versions/baseFields';
+import baseWorkflowFields from '../../workflows/baseFields';
 import TimestampsRequired from '../../errors/TimestampsRequired';
 import mergeBaseFields from '../../fields/mergeBaseFields';
 
@@ -50,6 +51,15 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     }
 
     sanitized.versions = merge(versionCollectionDefaults, sanitized.versions);
+  }
+
+  if (sanitized.workflow) {
+    const workflowFields = mergeBaseFields(sanitized.fields, baseWorkflowFields);
+
+    sanitized.fields = [
+      ...workflowFields,
+      ...sanitized.fields,
+    ];
   }
 
   if (sanitized.upload) {

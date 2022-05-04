@@ -119,6 +119,7 @@ const collectionSchema = joi.object().keys({
     }),
     joi.boolean(),
   ),
+  workflow: joi.boolean(),
 });
 
 export default collectionSchema;

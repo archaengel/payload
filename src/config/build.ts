@@ -2,6 +2,7 @@
 /* eslint-disable no-nested-ternary */
 import { Config, SanitizedConfig } from './types';
 import sanitize from './sanitize';
+import { transform } from './transform';
 
 /**
  * @description Builds and validates Payload configuration
@@ -15,10 +16,10 @@ export function buildConfig(config: Config): SanitizedConfig {
       config,
     );
 
-    const sanitizedConfig = sanitize(configWithPlugins);
+    const sanitizedConfig = sanitize(transform(configWithPlugins));
 
     return sanitizedConfig;
   }
 
-  return sanitize(config);
+  return sanitize(transform(config));
 }

@@ -23,11 +23,14 @@ import Autosave from '../../../elements/Autosave';
 
 import Status from '../../../elements/Status';
 import Publish from '../../../elements/Publish';
+import Promote from '../../../elements/Promote';
 import SaveDraft from '../../../elements/SaveDraft';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { OperationContext } from '../../../utilities/OperationProvider';
+import { getNextStage } from '../../../utilities/Workflow';
 
 import './index.scss';
+import { post } from '../../../../../workflows/baseFields';
 
 const baseClass = 'collection-edit';
 
@@ -47,7 +50,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
     apiURL,
     action,
     hasSavePermission,
+    hasStagePermission,
+    hasWorkflow,
+    workflowStages,
+    currentStage,
   } = props;
+
+  const nextStage = getNextStage(workflowStages, currentStage);
 
   const {
     slug,
@@ -162,7 +171,15 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           {!collection.versions.drafts.autosave && (
                             <SaveDraft />
                           )}
-                          <Publish />
+                            {collection.workflow && nextStage !== post
+                              ? <Promote
+                                  hasWorkflow={hasWorkflow}
+                                  hasStagePermission={hasStagePermission}
+                                  nextStage={nextStage}
+                                />
+                              : <Publish
+                                  workflowManaged
+                                />}
                         </React.Fragment>
                       )}
                       {!collection.versions?.drafts && (

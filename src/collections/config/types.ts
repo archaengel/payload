@@ -208,7 +208,8 @@ export type CollectionConfig = {
    */
   upload?: IncomingUploadType | boolean;
   versions?: IncomingCollectionVersions | boolean;
-  timestamps?: boolean
+  timestamps?: boolean;
+  workflow?: boolean
 };
 
 export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {

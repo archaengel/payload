@@ -1,6 +1,7 @@
 import { buildConfig } from '../src/config/build';
 import Admin from './collections/Admin';
 import PublicUser from './collections/PublicUsers';
+import Workflows from './globals/Workflows';
 
 export default buildConfig({
   // By default, Payload will boot up normally
@@ -22,7 +23,28 @@ export default buildConfig({
       versions: {
         drafts: true,
       },
+      workflow: true,
     },
+    {
+      slug: 'articles',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'body',
+          type: 'text',
+          required: true,
+        },
+      ],
+      versions: {
+        drafts: true,
+      },
+      workflow: true,
+    },
+    Workflows,
   ],
   admin: {
     user: 'admins',

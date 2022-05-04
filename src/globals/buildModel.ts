@@ -4,6 +4,7 @@ import { SanitizedConfig } from '../config/types';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import { GlobalModel } from './config/types';
 
+
 const buildModel = (config: SanitizedConfig): GlobalModel | null => {
   if (config.globals && config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: true });

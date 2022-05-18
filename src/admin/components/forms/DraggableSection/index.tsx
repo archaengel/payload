@@ -70,6 +70,7 @@ const DraggableSection: React.FC<Props> = (props) => {
                 moveRow={moveRow}
                 rowCount={rowCount}
                 positionIndex={rowIndex}
+                readOnly={readOnly}
               />
             </FieldTypeGutter>
 
@@ -80,7 +81,6 @@ const DraggableSection: React.FC<Props> = (props) => {
                   <HiddenInput
                     name={`${parentPath}.${rowIndex}.id`}
                     value={id}
-                    modifyForm={false}
                   />
                   <SectionTitle
                     label={label}

@@ -1,7 +1,7 @@
 import {
   useCallback, useEffect, useState,
 } from 'react';
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../utilities/Auth';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
 import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';
@@ -14,7 +14,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     validate,
     enableDebouncedValue,
     disableFormData,
-    ignoreWhileFlattening,
     condition,
   } = options;
 
@@ -66,7 +65,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     const fieldToDispatch = {
       path,
       disableFormData,
-      ignoreWhileFlattening,
       initialValue,
       validate,
       condition,
@@ -105,7 +103,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     getData,
     getSiblingData,
     id,
-    ignoreWhileFlattening,
     initialValue,
     operation,
     path,
@@ -116,10 +113,10 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   // Method to return from `useField`, used to
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
-  const setValue = useCallback((e, modifyForm = true) => {
+  const setValue = useCallback((e, disableModifyingForm = false) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if ((!ignoreWhileFlattening && !modified) && modifyForm) {
+    if (!modified && !disableModifyingForm) {
       if (typeof setModified === 'function') {
         setModified(true);
       }
@@ -128,7 +125,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   }, [
     setModified,
     modified,
-    ignoreWhileFlattening,
   ]);
 
   useEffect(() => {
@@ -143,7 +139,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (field?.value !== valueToSend && valueToSend !== undefined) {
+    if ((field?.value !== valueToSend && valueToSend !== undefined) || disableFormData !== field?.disableFormData) {
       sendField(valueToSend);
     }
   }, [
@@ -151,6 +147,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     valueToSend,
     sendField,
     field,
+    disableFormData,
   ]);
 
   return {

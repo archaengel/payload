@@ -1,7 +1,8 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import equal from 'deep-equal';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useAuth, useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../utilities/Config';
+import { useAuth } from '../../../../utilities/Auth';
 import { Where } from '../../../../../../types';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Button from '../../../../elements/Button';
@@ -12,11 +13,12 @@ import UploadGallery from '../../../../elements/UploadGallery';
 import { Props } from './types';
 import PerPage from '../../../../elements/PerPage';
 import formatFields from '../../../../views/collections/List/formatFields';
-
-import './index.scss';
 import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import { useWatchForm } from '../../../Form/context';
+import ViewDescription from '../../../../elements/ViewDescription';
+
+import './index.scss';
 
 const baseClass = 'select-existing-upload-modal';
 
@@ -117,7 +119,9 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
               />
             </div>
             {description && (
-              <div className={`${baseClass}__sub-header`}>{description}</div>
+              <div className={`${baseClass}__sub-header`}>
+                <ViewDescription description={description} />
+              </div>
             )}
           </header>
           <ListControls

@@ -7,7 +7,8 @@ keywords: overview, fields, config, configuration, documentation, Content Manage
 ---
 
 <Banner type="info">
-	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide variety of field types - both simple and complex.
+  Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data
+  that they store. Payload offers a wide variety of field types - both simple and complex.
 </Banner>
 
 Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
@@ -75,6 +76,7 @@ There are two arguments available to custom validation functions.
 | `operation`        | Will be "create" or "update" depending on the UI action or API call |
 | `id`               | The value of the collection `id`, will be `undefined` on create request |
 | `user`             | The currently authenticated user object |
+| `payload`          | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
 
 Example:
 ```js
@@ -227,6 +229,38 @@ const customFieldWithCondition = {
 
 ```
 
+### Default values
+
+Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
+
+Functions are called with an optional argument object containing:
+
+- `user` - the authenticated user object
+- `locale` - the currently selected locale string
+
+Here is an example of a defaultValue function that uses both:
+
+```js
+const translation: {
+    en: 'Written by',
+    es: 'escrito por',
+};
+
+const field = {
+    name: 'attribution',
+    type: 'text',
+    admin: {
+      // highlight-start
+      defaultValue: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
+      // highlight-end
+    }
+  };
+```
+
+<Banner type="success">
+  You can use async defaultValue functions to fill fields with data from API requests.
+</Banner>
+
 ### Description
 
 A description can be configured three ways.
@@ -246,7 +280,8 @@ As shown above, you can simply provide a string that will show by the field, but
       type: 'text',
       maxLength: 20,
       admin: {
-        description: ({ value }) => (`${typeof value === 'string' ? 20 - value.length : '20'} characters left`)
+        description: ({ value }) =>
+          (`${typeof value === 'string' ? 20 - value.length : '20'} characters left`)
       }
     }
   ]

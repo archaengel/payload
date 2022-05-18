@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../utilities/Config';
+import { useAuth } from '../../../../utilities/Auth';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Form from '../../../Form';
 import Button from '../../../../elements/Button';
@@ -8,6 +9,7 @@ import RenderFields from '../../../RenderFields';
 import FormSubmit from '../../../Submit';
 import Upload from '../../../../views/collections/Edit/Upload';
 import { NegativeFieldGutterProvider } from '../../../FieldTypeGutter/context';
+import ViewDescription from '../../../../elements/ViewDescription';
 import { Props } from './types';
 
 import './index.scss';
@@ -72,7 +74,9 @@ const AddUploadModal: React.FC<Props> = (props) => {
               />
             </div>
             {description && (
-              <div className={`${baseClass}__sub-header`}>{description}</div>
+              <div className={`${baseClass}__sub-header`}>
+                <ViewDescription description={description} />
+              </div>
             )}
           </header>
           <Upload

@@ -2,8 +2,9 @@ import React, {
   useCallback, useEffect, useState, useReducer,
 } from 'react';
 import equal from 'deep-equal';
-import { useAuth, useConfig } from '@payloadcms/config-provider';
 import qs from 'qs';
+import { useConfig } from '../../../utilities/Config';
+import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value } from '../../../elements/ReactSelect/types';
@@ -61,7 +62,7 @@ const Relationship: React.FC<Props> = (props) => {
   const { getData, getSiblingData } = useWatchForm();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
-  const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: 'null', label: 'None' }]);
+  const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: null, label: 'None' }]);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
@@ -313,6 +314,7 @@ const Relationship: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const valueToRender = (findOptionsByValue() || value) as Value;
+  if (valueToRender?.value === 'null') valueToRender.value = null;
 
   return (
     <div

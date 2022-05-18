@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../../utilities/Auth';
 import { usePreferences } from '../../../utilities/Preferences';
+import { useLocale } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
@@ -60,6 +61,7 @@ const Blocks: React.FC<Props> = (props) => {
   const formContext = useForm();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
+  const locale = useLocale();
   const operation = useOperation();
   const { dispatchFields } = formContext;
 
@@ -78,19 +80,18 @@ const Blocks: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     disableFormData,
-    ignoreWhileFlattening: true,
     condition,
   });
 
   const addRow = useCallback(async (rowIndex, blockType) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
 
-    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale });
 
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
     setValue(value as number + 1);
-  }, [path, setValue, value, blocks, dispatchFields, operation, id, user]);
+  }, [path, setValue, value, blocks, dispatchFields, operation, id, user, locale]);
 
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
@@ -104,7 +105,7 @@ const Blocks: React.FC<Props> = (props) => {
   }, [dispatchRows, dispatchFields, path]);
 
   const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
-    dispatchRows({ type: 'SET_COLLAPSE', rowID, collapsed });
+    dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
     if (preferencesKey) {
       const preferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -142,13 +143,16 @@ const Blocks: React.FC<Props> = (props) => {
   // Get preferences, and once retrieved,
   // Reset rows with preferences included
   useEffect(() => {
-    const fetchPreferences = async () => {
-      const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
-      const data = formContext.getDataByPath(path);
-      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
-    };
+    const data = formContext.getDataByPath(path);
 
-    fetchPreferences();
+    if (Array.isArray(data)) {
+      const fetchPreferences = async () => {
+        const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
+        dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+      };
+
+      fetchPreferences();
+    }
   }, [formContext, path, preferencesKey, getPreference]);
 
   // Set row count on mount and when form context is reset
@@ -158,7 +162,7 @@ const Blocks: React.FC<Props> = (props) => {
   }, [formContext, path]);
 
   useEffect(() => {
-    setValue(rows?.length || 0);
+    setValue(rows?.length || 0, true);
 
     if (rows?.length === 0) {
       setDisableFormData(false);

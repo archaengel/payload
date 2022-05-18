@@ -8,6 +8,7 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -108,21 +109,15 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     ...paginatedDocs,
     docs: await Promise.all(paginatedDocs.docs.map(async (data) => ({
       ...data,
-      version: await this.performFieldOperations(
-        globalConfig,
-        {
-          depth,
-          data: data.version,
-          req,
-          id: data.version.id,
-          hook: 'afterRead',
-          operation: 'read',
-          overrideAccess,
-          flattenLocales: true,
-          showHiddenFields,
-          isVersion: true,
-        },
-      ),
+      version: await afterRead({
+        depth,
+        doc: data.version,
+        entityConfig: globalConfig,
+        req,
+        overrideAccess,
+        showHiddenFields,
+        findMany: true,
+      }),
     }))),
   };
 
@@ -138,7 +133,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
       await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version }) || doc.version;
+        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
       }, Promise.resolve());
 
       return docRef;

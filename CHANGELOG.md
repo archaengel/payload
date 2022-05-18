@@ -1,3 +1,104 @@
+## [0.17.1](https://github.com/payloadcms/payload/compare/v0.17.0...v0.17.1) (2022-05-17)
+
+
+### Bug Fixes
+
+* only localizes schema if both field and top-level config are enabled ([e1a5547](https://github.com/payloadcms/payload/commit/e1a5547fea065f5590930cbeb6d07bf59d62d21d))
+
+# [0.17.0](https://github.com/payloadcms/payload/compare/v0.16.4...v0.17.0) (2022-05-16)
+
+
+### Bug Fixes
+
+* apply field condition to custom components ([#560](https://github.com/payloadcms/payload/issues/560)) ([1dfe2b8](https://github.com/payloadcms/payload/commit/1dfe2b892947411ff5295f5818befe28c4972915))
+* prevent changing order of readOnly arrays ([#563](https://github.com/payloadcms/payload/issues/563)) ([16b7edb](https://github.com/payloadcms/payload/commit/16b7edbc9782dcfb3bef77f1ff312e041d66922c))
+
+## [0.16.4](https://github.com/payloadcms/payload/compare/v0.16.3...v0.16.4) (2022-05-06)
+
+
+### Bug Fixes
+
+* fields in groups causing console error in browser ([#553](https://github.com/payloadcms/payload/issues/553)) ([78edac6](https://github.com/payloadcms/payload/commit/78edac684e54d335b15303d8348c8abcb2bba716))
+* save resized image file when equal to upload size ([#555](https://github.com/payloadcms/payload/issues/555)) ([46f4bc2](https://github.com/payloadcms/payload/commit/46f4bc2a077ce668e9b30c187092b9b0c6d83f86))
+
+## [0.16.3](https://github.com/payloadcms/payload/compare/v0.16.2...v0.16.3) (2022-05-04)
+
+
+### Bug Fixes
+
+* rare bug while merging locale data ([47c37e0](https://github.com/payloadcms/payload/commit/47c37e015300be4f9d5d4387f26a0adb39b8379c))
+
+## [0.16.2](https://github.com/payloadcms/payload/compare/v0.16.1...v0.16.2) (2022-05-02)
+
+
+### Bug Fixes
+
+* checkbox defaultValues and more typing of sanitize ([#550](https://github.com/payloadcms/payload/issues/550)) ([1e4a68f](https://github.com/payloadcms/payload/commit/1e4a68f76eeaab58ced0cc500223a1b86d66668e))
+
+
+### Features
+
+* exposes findMany argument to afterRead hooks to discern between find and findByID ([b3832e2](https://github.com/payloadcms/payload/commit/b3832e21c91fa5d52067cfc24a0b4f8aa6e178ec))
+* optimizes field operations ([18489fa](https://github.com/payloadcms/payload/commit/18489facebe5d7b0abc87dcc30fae28510b6bb19))
+
+## [0.16.1](https://github.com/payloadcms/payload/compare/v0.16.0...v0.16.1) (2022-04-29)
+
+
+### Features
+
+* exposes payload within server-side validation args ([e46b942](https://github.com/payloadcms/payload/commit/e46b94225957bba7758a0a2c22776c44a2d2d633))
+
+# [0.16.0](https://github.com/payloadcms/payload/compare/v0.15.13...v0.16.0) (2022-04-29)
+
+
+### Bug Fixes
+
+* file upload safely handles missing mimeTypes ([#540](https://github.com/payloadcms/payload/issues/540)) ([bf48fdf](https://github.com/payloadcms/payload/commit/bf48fdf18961a2e57bcc5aae73de4c569e97e42b))
+
+
+### Features
+
+* allow subfield readOnly to override parent readOnly ([#546](https://github.com/payloadcms/payload/issues/546)) ([834f4c2](https://github.com/payloadcms/payload/commit/834f4c270020bf32852c00a3abbb908853689006))
+* allows defaultValue to accept async function to calculate defaultValue ([#547](https://github.com/payloadcms/payload/issues/547)) ([e297eb9](https://github.com/payloadcms/payload/commit/e297eb90907d933524d220255d5f8dc4276358c5))
+
+## [0.15.13](https://github.com/payloadcms/payload/compare/v0.15.12...v0.15.13) (2022-04-26)
+
+## [0.15.12](https://github.com/payloadcms/payload/compare/v0.15.11...v0.15.12) (2022-04-26)
+
+
+### Bug Fixes
+
+* ensures adding array / block rows modifies form state ([8bdbd0d](https://github.com/payloadcms/payload/commit/8bdbd0dd418cd665441703fa4fd87becafd26170))
+
+## [0.15.11](https://github.com/payloadcms/payload/compare/v0.15.10...v0.15.11) (2022-04-24)
+
+
+### Bug Fixes
+
+* improperly typed access control ([b99ec06](https://github.com/payloadcms/payload/commit/b99ec060cacf7a05c20ba0a05dd6ef6ab60df304))
+
+## [0.15.10](https://github.com/payloadcms/payload/compare/v0.15.9...v0.15.10) (2022-04-24)
+
+
+### Bug Fixes
+
+* block form-data bug ([3b70560](https://github.com/payloadcms/payload/commit/3b70560e2566de5294eb15945120ffd6f1f5f1c4))
+
+## [0.15.9](https://github.com/payloadcms/payload/compare/v0.15.8...v0.15.9) (2022-04-20)
+
+
+### Bug Fixes
+
+* intermittent blocks UI issue ([3c1dfb8](https://github.com/payloadcms/payload/commit/3c1dfb88df8651b26cb1dbc102a34cd0aad722bc))
+
+## [0.15.8](https://github.com/payloadcms/payload/compare/v0.15.7...v0.15.8) (2022-04-20)
+
+
+### Bug Fixes
+
+* ensure relationTo is valid in upload fields ([#533](https://github.com/payloadcms/payload/issues/533)) ([9e324be](https://github.com/payloadcms/payload/commit/9e324be0577447965ee2f87c3a3943cd4f0c0a1c))
+* richtext editor input height ([#529](https://github.com/payloadcms/payload/issues/529)) ([3dcd8a2](https://github.com/payloadcms/payload/commit/3dcd8a24cb8cbb77aae82a1f841429e7149e3182))
+
 ## [0.15.7](https://github.com/payloadcms/payload/compare/v0.15.6...v0.15.7) (2022-04-12)
 
 ### Bug Fixes

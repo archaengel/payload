@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
 
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
@@ -64,12 +65,12 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user]);
+  }, [dataToRender, fields, id, user, locale]);
 
   return (
     <NegativeFieldGutterProvider allow>

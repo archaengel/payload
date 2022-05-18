@@ -13,7 +13,7 @@ expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static'
 
 payload.init({
   secret: 'SECRET_KEY',
-  mongoURL: process.env.VANILLA_DB_URL,
+  mongoURL: process.env.VANILLA_DB_URL || 'mongodb://localhost/payload',
   express: expressApp,
   email: {
     fromName: 'Payload',

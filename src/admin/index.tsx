@@ -2,13 +2,14 @@
 // @ts-ignore - need to do this because this file doesn't actually exist
 import config from 'payload-config';
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
-import { ConfigProvider, AuthProvider } from '@payloadcms/config-provider';
+import { AuthProvider } from './components/utilities/Auth';
+import { ConfigProvider } from './components/utilities/Config';
 import { PreferencesProvider } from './components/utilities/Preferences';
 import { CustomProvider } from './components/utilities/CustomProvider';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
@@ -22,10 +23,10 @@ const Index = () => (
   <React.Fragment>
     <ConfigProvider config={config}>
       <WindowInfoProvider breakpoints={{
-        xs: 400,
-        s: 768,
-        m: 1024,
-        l: 1440,
+        xs: '(max-width: 400px)',
+        s: '(max-width: 768px)',
+        m: '(max-width: 1024px)',
+        l: '(max-width: 1440px)',
       }}
       >
         <ScrollInfoProvider>
@@ -61,7 +62,9 @@ const Index = () => (
   </React.Fragment>
 );
 
-render(<Index />, document.getElementById('app'));
+const container = document.getElementById('app');
+const root = createRoot(container); // createRoot(container!) if you use TypeScript
+root.render(<Index />);
 
 // Needed for Hot Module Replacement
 if (typeof (module.hot) !== 'undefined') {

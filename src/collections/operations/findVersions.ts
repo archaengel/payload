@@ -9,6 +9,7 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { Payload } from '../../index';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -131,21 +132,15 @@ async function findVersions<T extends TypeWithVersion<T> = any>(this: Payload, a
     ...result,
     docs: await Promise.all(result.docs.map(async (data) => ({
       ...data,
-      version: await this.performFieldOperations(
-        collectionConfig,
-        {
-          depth,
-          data: data.version,
-          req,
-          id: data.version.id,
-          hook: 'afterRead',
-          operation: 'read',
-          overrideAccess,
-          flattenLocales: true,
-          showHiddenFields,
-          isVersion: true,
-        },
-      ),
+      version: await afterRead({
+        depth,
+        doc: data.version,
+        entityConfig: collectionConfig,
+        overrideAccess,
+        req,
+        showHiddenFields,
+        findMany: true,
+      }),
     }))),
   };
 
@@ -161,7 +156,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(this: Payload, a
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version }) || doc.version;
+        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
       }, Promise.resolve());
 
       return docRef;

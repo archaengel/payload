@@ -112,7 +112,8 @@ const DefaultValues: CollectionConfig = {
       label: 'Group',
       name: 'group',
       defaultValue: {
-        nestedText1: 'neat',
+        nestedText2: 'nested default text 2',
+        nestedText3: 'neat',
       },
       fields: [
         {
@@ -122,12 +123,16 @@ const DefaultValues: CollectionConfig = {
               name: 'nestedText1',
               label: 'Nested Text 1',
               type: 'text',
-              defaultValue: 'nested default text 1',
-            }, {
+              defaultValue: 'this should take priority',
+            },
+            {
               name: 'nestedText2',
               label: 'Nested Text 2',
               type: 'text',
-              defaultValue: 'nested default text 2',
+            },
+            {
+              name: 'nestedText3',
+              type: 'text',
             },
           ],
         },
@@ -143,6 +148,7 @@ const DefaultValues: CollectionConfig = {
       defaultValue: [
         {
           arrayText1: 'Get out',
+          arrayText2: 'Get in',
         },
       ],
       fields: [
@@ -280,6 +286,42 @@ const DefaultValues: CollectionConfig = {
       defaultValue: [{
         children: [{ text: 'Cookin now' }],
       }],
+    },
+    {
+      type: 'array',
+      name: 'asyncArray',
+      defaultValue: () => {
+        return [{ child: 'ok' }];
+      },
+      fields: [
+        {
+          name: 'child',
+          type: 'text',
+          defaultValue: () => {
+            return 'async child';
+          },
+        },
+      ],
+    },
+    {
+      name: 'asyncText',
+      type: 'text',
+      defaultValue: async (): Promise<string> => {
+        return new Promise((resolve) => setTimeout(() => {
+          resolve('asyncFunction');
+        }, 50));
+      },
+    },
+    {
+      name: 'function',
+      type: 'text',
+      defaultValue: (args): string => {
+        const { locale } = args;
+        if (locale === 'en') {
+          return 'function';
+        }
+        return '';
+      },
     },
   ],
   timestamps: true,

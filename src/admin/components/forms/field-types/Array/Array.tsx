@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
@@ -9,6 +8,7 @@ import reducer from '../rowReducer';
 import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import useField from '../../useField';
+import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
@@ -56,6 +56,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const formContext = useForm();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
+  const locale = useLocale();
   const operation = useOperation();
 
   const { dispatchFields } = formContext;
@@ -77,21 +78,21 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     disableFormData,
-    ignoreWhileFlattening: true,
     condition,
   });
 
   const addRow = useCallback(async (rowIndex) => {
-    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);
-  }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user]);
+  }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user, locale]);
 
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
-  }, [dispatchRows, dispatchFields, path]);
+    setValue(value as number - 1);
+  }, [dispatchRows, dispatchFields, path, value, setValue]);
 
   const moveRow = useCallback((moveFromIndex, moveToIndex) => {
     dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
@@ -111,7 +112,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [formContext, path]);
 
   useEffect(() => {
-    setValue(rows?.length || 0);
+    setValue(rows?.length || 0, true);
 
     if (rows?.length === 0) {
       setDisableFormData(false);

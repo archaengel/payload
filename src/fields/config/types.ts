@@ -7,21 +7,23 @@ import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
+import { Payload } from '../..';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
-  value?: P,
-  originalDoc?: T,
   data?: Partial<T>,
-  siblingData: Partial<S>
+  findMany?: boolean
+  originalDoc?: T,
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
+  siblingData: Partial<S>
+  value?: P,
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
 
 export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest
-  id?: string
+  id?: string | number
   data?: Partial<T>
   siblingData?: Partial<P>
   doc?: T
@@ -67,6 +69,7 @@ export type ValidateOptions<T, S, F> = {
   id?: string | number
   user?: Partial<User>
   operation?: Operation
+  payload?: Payload
 } & F;
 
 export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
@@ -181,9 +184,9 @@ export type UIField = {
     width?: string
     condition?: Condition
     components?: {
-      Filter?: React.ComponentType;
-      Cell?: React.ComponentType;
-      Field: React.ComponentType;
+      Filter?: React.ComponentType<any>;
+      Cell?: React.ComponentType<any>;
+      Field: React.ComponentType<any>;
     }
   }
   type: 'ui';
@@ -224,6 +227,10 @@ export type RelationshipField = FieldBase & {
 export type ValueWithRelation = {
   relationTo: string
   value: string | number
+}
+
+export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
+  return typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
 export type RelationshipValue = (string | number)

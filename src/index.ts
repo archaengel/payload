@@ -34,7 +34,6 @@ import bindResolvers, { GraphQLResolvers } from './graphql/bindResolvers';
 import buildEmail from './email/build';
 import identifyAPI from './express/middleware/identifyAPI';
 import errorHandler, { ErrorHandler } from './express/middleware/errorHandler';
-import performFieldOperations from './fields/performFieldOperations';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
@@ -92,8 +91,6 @@ export class Payload {
 
   sendEmail: (message: Message) => Promise<unknown>;
 
-  license: string;
-
   secret: string;
 
   mongoURL: string;
@@ -109,8 +106,6 @@ export class Payload {
   errorHandler: ErrorHandler;
 
   authenticate: PayloadAuthenticate;
-
-  performFieldOperations: typeof performFieldOperations;
 
   requestHandlers: RequestHandlers;
 
@@ -131,7 +126,6 @@ export class Payload {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
-    this.license = options.license;
     this.emailOptions = { ...(options.email) };
     this.secret = crypto
       .createHash('sha256')
@@ -147,8 +141,6 @@ export class Payload {
     bindOperations(this);
     bindRequestHandlers(this);
     bindResolvers(this);
-
-    this.performFieldOperations = performFieldOperations.bind(this);
 
     // If not initializing locally, scaffold router
     if (!this.local) {

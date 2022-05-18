@@ -36,7 +36,7 @@
     "demo:build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
     "demo:generate:types": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/generateTypes",
     "demo:serve": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=production nodemon",
-    "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon",
+    "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon --config nodemon.vanilla.json",
     "dev:pal": "cross-env PAYLOAD_CONFIG_PATH=pal-demo/payload.config.ts nodemon",
     "test": "yarn test:int && yarn test:client",
     "pretest": "yarn build",

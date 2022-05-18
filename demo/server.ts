@@ -13,7 +13,7 @@ expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static'
 
 payload.init({
   secret: 'SECRET_KEY',
-  mongoURL: process.env.DB_URL,
+  mongoURL: process.env.VANILLA_DB_URL,
   express: expressApp,
   email: {
     fromName: 'Payload',
@@ -38,7 +38,7 @@ externalRouter.get('/', (req, res) => {
 
 expressApp.use('/external-route', externalRouter);
 
-expressApp.listen(3000, async () => {
+expressApp.listen(3030, async () => {
   payload.logger.info(`Admin URL on ${payload.getAdminURL()}`);
   payload.logger.info(`API URL on ${payload.getAPIURL()}`);
 });

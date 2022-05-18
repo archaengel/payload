@@ -44,7 +44,7 @@ import BeforeLogin from './client/components/BeforeLogin';
 
 export default buildConfig({
   cookiePrefix: 'payload',
-  serverURL: 'http://localhost:3000',
+  serverURL: 'http://localhost:3030',
   typescript: {
     outputFile: path.resolve(__dirname, './payload-types.ts'),
   },

@@ -80,6 +80,28 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const dataToRender = (locationState as Record<string, unknown>)?.data || data;
 
+  const commentQuery = {
+    'content-id': {
+      equals: id
+    }
+  };
+
+  const [{ data: { docs: comments } }] = usePayloadAPI(
+    (isEditing ? `${serverURL}${api}/comments` : null),
+   { initialParams: { 'fallback-locale': 'nu1ll', depth: 0, draft: 'true', where: commentQuery } },
+ );
+
+ const [isEditingComment, setIsEditingComment] = useState(false)
+
+ const addComment = (name: string) => (e) => {
+   console.log(id)
+   console.log(name)
+   setIsEditingComment(true);
+   e.preventDefault()
+ }
+
+ console.log(comments);
+
   useEffect(() => {
     const nav: StepNavItem[] = [{
       url: `${admin}/collections/${slug}`,
@@ -141,7 +163,6 @@ const EditView: React.FC<IndexProps> = (props) => {
     return collectionStages[currentStageIndex] || null
   }
 
-
   const currentStage = getCurrentStage();
   const collectionPermissions = permissions?.collections?.[slug];
   const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
@@ -169,6 +190,10 @@ const EditView: React.FC<IndexProps> = (props) => {
           action,
           workflowStages: collectionStages,
           currentStage: data["_workflow_stage"],
+          comments,
+          addComment,
+          isEditingComment,
+          setIsEditingComment
         }}
       />
     </NegativeFieldGutterProvider>

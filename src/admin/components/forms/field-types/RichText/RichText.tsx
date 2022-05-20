@@ -49,6 +49,7 @@ const RichText: React.FC<Props> = (props) => {
     validate = richText,
     label,
     admin,
+    addComment,
     admin: {
       readOnly,
       style,
@@ -336,8 +337,9 @@ const RichText: React.FC<Props> = (props) => {
         <FieldDescription
           value={value}
           description={description}
-        />
-      </div>
+        />  
+        <button onClick={addComment(name)}>+ Comments</button>     
+      </div>    
     </div>
   );
 };

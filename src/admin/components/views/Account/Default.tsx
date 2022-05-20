@@ -123,6 +123,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       fieldSchema={fields}
                     />
                   </div>
+                  <h1>Comment</h1>
                   <ul className={`${baseClass}__meta`}>
                     <li className={`${baseClass}__api-url`}>
                       <span className={`${baseClass}__label`}>

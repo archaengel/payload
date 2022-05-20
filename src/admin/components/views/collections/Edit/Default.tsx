@@ -31,6 +31,7 @@ import { getNextStage } from '../../../utilities/Workflow';
 
 import './index.scss';
 import { post } from '../../../../../workflows/baseFields';
+import CommentsView from '../../Comments';
 
 const baseClass = 'collection-edit';
 
@@ -54,6 +55,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
     hasWorkflow,
     workflowStages,
     currentStage,
+    comments = [],
+    addComment,
+    isEditingComment,
+    setIsEditingComment
   } = props;
 
   const nextStage = getNextStage(workflowStages, currentStage);
@@ -133,6 +138,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
+                  addComment={addComment}
+                  setIsEditingComment={setIsEditingComment}
                 />
               </div>
             </div>
@@ -213,8 +220,17 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       filter={(field) => field?.admin?.position === 'sidebar'}
                       fieldTypes={fieldTypes}
                       fieldSchema={fields}
+                      addComment={addComment}
                     />
                   </div>
+                  <CommentsView
+                    comments={comments}
+                    isEditing={isEditingComment}
+                    setIsEditing={setIsEditingComment}
+                    contentId={id}
+                    field={"body"}
+                    saveComment={console.log}
+                  />
                   {isEditing && (
                   <ul className={`${baseClass}__meta`}>
                     {!hideAPIURL && (

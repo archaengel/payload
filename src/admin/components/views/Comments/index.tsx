@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CommentsProp } from './types';
 
-const renderComment = ({'comment-content': content}, i: number) => 
+const renderComment = ({'comment-content': content}, i: number) =>
 <li key={`comment__${i}`}>{content}</li>
 
 
@@ -13,8 +13,13 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
         isEditing,
         setIsEditing
     } = props
-   
-   const [content, setContent] = useState("Default")
+
+   const [content, setContent] = useState("")
+
+   const resetState = () => {
+    setIsEditing(false)
+    setContent("")
+   }
 
    const handleSave = (evt) => {
        evt.preventDefault()
@@ -25,6 +30,12 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
        }
 
        saveComment(comment)
+       resetState()
+   }
+
+   const handleCancel = (evt) => {
+       evt.preventDefault()
+       resetState()
    }
 
     return (
@@ -33,20 +44,20 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
             {isEditing ?
               <li>
                   <input
+                  placeholder='Enter comment...'
                   value={content}
                   onChange={((e) => setContent(e.target.value))}
                   />
                   <div>
-                      <button>cancel</button>
+                      <button onClick={handleCancel}>cancel</button>
                       <button onClick={handleSave}>
                           save
                       </button>
                   </div>
              </li> :
             null}
-            <li>{content}</li>
         </ul>
     )
-} 
+}
 
 export default CommentsView;

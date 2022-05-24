@@ -30,4 +30,5 @@ export type Props = IndexProps & {
   addComment: AddCommentCallback
   isEditingComment: boolean
   setIsEditingComment: (isEditing: boolean) => void
+  fieldName: string
 }

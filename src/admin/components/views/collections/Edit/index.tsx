@@ -92,10 +92,10 @@ const EditView: React.FC<IndexProps> = (props) => {
  );
 
  const [isEditingComment, setIsEditingComment] = useState(false)
-
+ const [fieldName, setFieldName] = useState("")
  const addComment = (name: string) => (e) => {
    console.log(id)
-   console.log(name)
+   setFieldName(name)
    setIsEditingComment(true);
    e.preventDefault()
  }
@@ -193,7 +193,8 @@ const EditView: React.FC<IndexProps> = (props) => {
           comments,
           addComment,
           isEditingComment,
-          setIsEditingComment
+          setIsEditingComment,
+          fieldName
         }}
       />
     </NegativeFieldGutterProvider>

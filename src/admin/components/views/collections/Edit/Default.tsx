@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
 import { useConfig } from '../../../utilities/Config';
@@ -32,6 +32,9 @@ import { getNextStage } from '../../../utilities/Workflow';
 import './index.scss';
 import { post } from '../../../../../workflows/baseFields';
 import CommentsView from '../../Comments';
+import { Comment } from '../../Comments/types';
+import { useForm } from '../../../forms/Form/context';
+import { requests } from '../../../../api';
 
 const baseClass = 'collection-edit';
 
@@ -58,7 +61,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
     comments = [],
     addComment,
     isEditingComment,
-    setIsEditingComment
+    setIsEditingComment,
+    fieldName
   } = props;
 
   const nextStage = getNextStage(workflowStages, currentStage);
@@ -84,6 +88,24 @@ const DefaultEditView: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const operation = isEditing ? 'update' : 'create';
+
+  const { serverURL, routes: { api } } = useConfig();
+
+  const saveComment = useCallback(async (comment: Comment) => {
+    const action = `${serverURL}${api}/comments`;
+
+    await requests.post(action, {
+      body: JSON.stringify({
+        'content-id': comment['content-id'],
+        field: comment.field,
+        'comment-content': comment['comment-content'],
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+  }, [serverURL, api]);
+
 
   return (
     <div className={classes}>
@@ -221,6 +243,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       fieldTypes={fieldTypes}
                       fieldSchema={fields}
                       addComment={addComment}
+                      setIsEditingComment={setIsEditingComment}
                     />
                   </div>
                   <CommentsView
@@ -228,8 +251,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     isEditing={isEditingComment}
                     setIsEditing={setIsEditingComment}
                     contentId={id}
-                    field={"body"}
-                    saveComment={console.log}
+                    field={fieldName}
+                    saveComment={saveComment}
                   />
                   {isEditing && (
                   <ul className={`${baseClass}__meta`}>

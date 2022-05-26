@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
+import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, Range } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
@@ -24,6 +24,7 @@ import mergeCustomFunctions from './mergeCustomFunctions';
 import withEnterBreakOut from './plugins/withEnterBreakOut';
 
 import './index.scss';
+import { useCommentsContext } from '../../../views/Comments/context';
 
 const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'indent', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
@@ -49,7 +50,6 @@ const RichText: React.FC<Props> = (props) => {
     validate = richText,
     label,
     admin,
-    addComment,
     admin: {
       readOnly,
       style,
@@ -93,6 +93,16 @@ const RichText: React.FC<Props> = (props) => {
 
     return <div {...attributes}>{children}</div>;
   }, [enabledElements, path, props]);
+
+
+  const { setFieldName, setRange, setIsEditing: setIsEditingComment } = useCommentsContext();
+
+  const addComment = (fieldName: string) => (e) => {
+    e.preventDefault();
+    setFieldName(fieldName);
+    setIsEditingComment(true);
+  };
+
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
@@ -330,6 +340,13 @@ const RichText: React.FC<Props> = (props) => {
                     }
                   });
                 }}
+                onSelect={() => {
+                  const range = editor.selection;
+                  if (!Range.isCollapsed(range)) {
+                    setRange(range);
+                    console.log(range);
+                  }
+                }}
               />
             </div>
           </div>
@@ -337,9 +354,14 @@ const RichText: React.FC<Props> = (props) => {
         <FieldDescription
           value={value}
           description={description}
-        />  
-        <button onClick={addComment(name)}>+ Comments</button>     
-      </div>    
+        />
+        <button
+          type="button"
+          onClick={addComment(name)}
+        >
+          + Comments
+        </button>
+      </div>
     </div>
   );
 };

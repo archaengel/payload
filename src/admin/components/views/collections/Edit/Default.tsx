@@ -32,9 +32,6 @@ import { getNextStage } from '../../../utilities/Workflow';
 import './index.scss';
 import { post } from '../../../../../workflows/baseFields';
 import CommentsView from '../../Comments';
-import { Comment } from '../../Comments/types';
-import { useForm } from '../../../forms/Form/context';
-import { requests } from '../../../../api';
 
 const baseClass = 'collection-edit';
 
@@ -58,11 +55,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
     hasWorkflow,
     workflowStages,
     currentStage,
-    comments = [],
-    addComment,
-    isEditingComment,
-    setIsEditingComment,
-    fieldName
   } = props;
 
   const nextStage = getNextStage(workflowStages, currentStage);
@@ -88,23 +80,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const operation = isEditing ? 'update' : 'create';
-
-  const { serverURL, routes: { api } } = useConfig();
-
-  const saveComment = useCallback(async (comment: Comment) => {
-    const action = `${serverURL}${api}/comments`;
-
-    await requests.post(action, {
-      body: JSON.stringify({
-        'content-id': comment['content-id'],
-        field: comment.field,
-        'comment-content': comment['comment-content'],
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-  }, [serverURL, api]);
 
 
   return (
@@ -160,8 +135,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
-                  addComment={addComment}
-                  setIsEditingComment={setIsEditingComment}
                 />
               </div>
             </div>
@@ -201,14 +174,18 @@ const DefaultEditView: React.FC<Props> = (props) => {
                             <SaveDraft />
                           )}
                             {collection.workflow && nextStage !== post
-                              ? <Promote
+                              ? (
+                                <Promote
                                   hasWorkflow={hasWorkflow}
                                   hasStagePermission={hasStagePermission}
                                   nextStage={nextStage}
                                 />
-                              : <Publish
+                              )
+                              : (
+                                <Publish
                                   workflowManaged
-                                />}
+                                />
+                              )}
                         </React.Fragment>
                       )}
                       {!collection.versions?.drafts && (
@@ -242,17 +219,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       filter={(field) => field?.admin?.position === 'sidebar'}
                       fieldTypes={fieldTypes}
                       fieldSchema={fields}
-                      addComment={addComment}
-                      setIsEditingComment={setIsEditingComment}
                     />
                   </div>
                   <CommentsView
-                    comments={comments}
-                    isEditing={isEditingComment}
-                    setIsEditing={setIsEditingComment}
                     contentId={id}
-                    field={fieldName}
-                    saveComment={saveComment}
                   />
                   {isEditing && (
                   <ul className={`${baseClass}__meta`}>

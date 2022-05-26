@@ -5,8 +5,6 @@ import { Fields } from '../../../forms/Form/types';
 import { Stage } from '../../../utilities/Workflow';
 import { Comment } from '../../Comments/types';
 
-export type AddCommentCallback = (name: string) => React.MouseEventHandler
-
 export type IndexProps = {
   collection: SanitizedCollectionConfig
   isEditing?: boolean
@@ -26,9 +24,4 @@ export type Props = IndexProps & {
   autosaveEnabled: boolean
   workflowStages: Stage[]
   currentStage?: string
-  comments: Comment[]
-  addComment: AddCommentCallback
-  isEditingComment: boolean
-  setIsEditingComment: (isEditing: boolean) => void
-  fieldName: string
 }

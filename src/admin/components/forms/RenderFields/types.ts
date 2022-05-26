@@ -1,6 +1,5 @@
 import { FieldPermissions } from '../../../../auth/types';
 import { FieldWithPath, Field } from '../../../../fields/config/types';
-import { AddCommentCallback } from '../../views/collections/Edit/types';
 import { FieldTypes } from '../field-types';
 
 export type Props = {
@@ -12,6 +11,4 @@ export type Props = {
   filter?: (field: Field) => boolean
   fieldSchema: FieldWithPath[]
   fieldTypes: FieldTypes
-  addComment: AddCommentCallback
-  setIsEditingComment: (isEditingComment: boolean) => void
 }

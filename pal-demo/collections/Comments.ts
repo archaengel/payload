@@ -1,30 +1,68 @@
-import { CollectionConfig } from "../../src/collections/config/types";
+import { CollectionConfig } from '../../src/collections/config/types';
 
 const Comments: CollectionConfig = {
-    slug: 'comments',
-    fields: [
+  slug: 'comments',
+  fields: [
+    {
+      name: 'content-id',
+      type: 'text',
+      index: true,
+    },
+    {
+      name: 'field',
+      type: 'text',
+    },
+    {
+      name: 'range',
+      type: 'group',
+      fields: [
         {
-            name: 'content-id',
-            type: 'text',
-            index: true,
+          name: 'anchor',
+          type: 'group',
+          fields: [
+            {
+              name: 'path',
+              type: 'array',
+              fields: [
+                {
+                  name: 'index',
+                  type: 'number',
+                },
+              ],
+            },
+            {
+              name: 'offset',
+              type: 'number',
+            },
+          ],
         },
         {
-            name: 'field',
-            type: 'text',
+          name: 'focus',
+          type: 'group',
+          fields: [
+            {
+              name: 'path',
+              type: 'array',
+              fields: [
+                {
+                  name: 'index',
+                  type: 'number',
+                },
+              ],
+            },
+            {
+              name: 'offset',
+              type: 'number',
+            },
+          ],
         },
-        {
-            name: 'start-index',
-            type: 'number'
-        },
-        {
-            name: 'end-index',
-            type: 'number'
-        },
-        {
-            name: 'comment-content',
-            type: 'text'
-        }
-    ]
-}
+      ],
+    },
+    {
+      name: 'comment-content',
+      type: 'text',
+    },
+  ],
+};
 
-export default Comments
+export default Comments;

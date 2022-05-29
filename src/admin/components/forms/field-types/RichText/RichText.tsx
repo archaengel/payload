@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, Range } from 'slate';
+import { createEditor, Transforms, Node, NodeEntry, Element as SlateElement, Text, BaseEditor, Range, Editor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
@@ -94,8 +94,7 @@ const RichText: React.FC<Props> = (props) => {
     return <div {...attributes}>{children}</div>;
   }, [enabledElements, path, props]);
 
-
-  const { setFieldName, setRange, setIsEditing: setIsEditingComment } = useCommentsContext();
+  const { setFieldName, setRange, currentRange, setIsEditing: setIsEditingComment } = useCommentsContext();
 
   const addComment = (fieldName: string) => (e) => {
     e.preventDefault();
@@ -103,10 +102,10 @@ const RichText: React.FC<Props> = (props) => {
     setIsEditingComment(true);
   };
 
-
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
 
+    console.log('leaf.highlighted:', leaf.highlighted);
     if (enabledLeaves[matchedLeafName]?.Leaf) {
       const { Leaf } = enabledLeaves[matchedLeafName];
 
@@ -124,7 +123,12 @@ const RichText: React.FC<Props> = (props) => {
     }
 
     return (
-      <span {...attributes}>{children}</span>
+      <span
+        {...attributes}
+        style={leaf.highlighted ? { background: `${baseClass}__highlight` } : {}}
+      >
+        {children}
+      </span>
     );
   }, [enabledLeaves, path, props]);
 
@@ -174,6 +178,35 @@ const RichText: React.FC<Props> = (props) => {
   const onBlur = useCallback(() => {
     editor.blurSelection = editor.selection;
   }, [editor]);
+
+  useEffect(() => {
+    if (currentRange) {
+      Transforms.select(editor, currentRange);
+      ReactEditor.focus(editor);
+      console.dir(currentRange);
+    }
+  }, [editor, currentRange]);
+
+  // TODO(archaengel): Looks like this is higlighting entire ranges if they intersect, not only the
+  // range from the selected comment. We should rigure out how to massage the ranges to correct this.
+  const decorate = useCallback(([node, nodePath]: NodeEntry): Range[] => {
+    if (Text.isText(node) && currentRange != null) {
+      const intersection = Range.intersection(currentRange, Editor.range(editor, nodePath));
+
+      if (intersection == null) {
+        return [];
+      }
+
+      const range = {
+        highlighted: true,
+        ...intersection,
+      };
+
+      return [range];
+    }
+
+    return [];
+  }, [currentRange, editor]);
 
   useEffect(() => {
     if (!loaded) {
@@ -289,6 +322,7 @@ const RichText: React.FC<Props> = (props) => {
                 spellCheck
                 readOnly={readOnly}
                 onBlur={onBlur}
+                decorate={decorate}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     if (event.shiftKey) {
@@ -344,7 +378,7 @@ const RichText: React.FC<Props> = (props) => {
                   const range = editor.selection;
                   if (!Range.isCollapsed(range)) {
                     setRange(range);
-                    console.log(range);
+                    console.log('onSelect:', range);
                   }
                 }}
               />

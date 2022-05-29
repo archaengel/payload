@@ -13,6 +13,8 @@ interface Context {
     comments: Comment[]
     range: Range | null
     setRange: UpdateFn<Range | null>
+    currentRange: Range | null
+    setCurrentRange: UpdateFn<Range | null>
     isEditing: boolean
     setIsEditing: UpdateFn<boolean>
     fieldName: string
@@ -29,6 +31,7 @@ export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [fieldName, setFieldName] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
   const [range, setRange] = useState<Range | null>(null);
+  const [currentRange, setCurrentRange] = useState<Range | null>(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,6 +45,23 @@ export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         equals: id,
       },
     };
+    const unwrap = ({ index }: {index: number}) => index;
+    const dbRangeToSlateRange = (dbRange) => ({
+      anchor: {
+        ...dbRange.anchor,
+        path: dbRange.anchor.path.map(unwrap),
+      },
+      focus: {
+        ...dbRange.focus,
+        path: dbRange.focus.path.map(unwrap),
+      },
+    });
+    const dbCommentToSlate = (dbComment) => {
+      return {
+        ...dbComment,
+        range: dbRangeToSlateRange(dbComment.range),
+      };
+    };
     const url = `${serverURL}${api}/comments`;
     const search = queryString.stringify({
       'fallback-locale': 'null', depth: 0, draft: 'true', where: commentQuery,
@@ -54,26 +74,23 @@ export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       const json = await response.json();
-      setComments(json.docs ?? []);
+      setComments(json.docs ? json.docs.map(dbCommentToSlate) : []);
 
-      console.log(json);
       setIsLoading(false);
     } catch (error) {
-      console.log(error);
       setIsError(true);
       setIsLoading(false);
     }
-
-    console.log(api, serverURL, commentQuery);
   }, [api, serverURL, id]);
 
-  console.log(comments);
 
   return (
     <CommentsContext.Provider value={{
       comments,
       range,
       setRange,
+      setCurrentRange,
+      currentRange,
       isEditing,
       setIsEditing,
       fieldName,

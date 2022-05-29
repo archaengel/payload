@@ -2,11 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Range } from 'slate';
 import { requests } from '../../../api';
 import { useConfig } from '../../utilities/Config';
+import CommentElement from './CommentElement';
 import { useCommentsContext } from './context';
 import { CommentsProp, Comment } from './types';
 
-const renderComment = ({ 'comment-content': content }, i: number) => <li key={`comment__${i}`}>{content}</li>;
-
+const renderComment = (comment: Comment) => (
+  <CommentElement
+    key={`comment__${comment.id}`}
+    comment={comment}
+  />
+);
 
 const CommentsView: React.FC<CommentsProp> = (props) => {
   const {
@@ -20,26 +25,24 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
     fieldName: field,
     reloadComments,
     range,
+    setCurrentRange,
   } = useCommentsContext();
-
 
   const { serverURL, routes: { api } } = useConfig();
 
-  const saveComment = useCallback(async (comment: Comment) => {
+  const saveComment = useCallback(async (comment: Omit<Comment, 'id'>) => {
     const action = `${serverURL}${api}/comments`;
-    const indexWrap = (index) => ({ index });
-    const slateToPayloadRange = ({ anchor, focus }: Range) => {
-      return {
-        anchor: {
-          ...anchor,
-          path: anchor.path.map(indexWrap),
-        },
-        focus: {
-          ...focus,
-          path: focus.path.map(indexWrap),
-        },
-      };
-    };
+    const indexWrap = (index: number) => ({ index });
+    const slateToPayloadRange = ({ anchor, focus }: Range) => ({
+      anchor: {
+        ...anchor,
+        path: anchor.path.map(indexWrap),
+      },
+      focus: {
+        ...focus,
+        path: focus.path.map(indexWrap),
+      },
+    });
 
     await requests.post(action, {
       body: JSON.stringify({
@@ -94,6 +97,7 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
               placeholder="Enter comment..."
               value={content}
               onChange={((e) => setContent(e.target.value))}
+              onFocus={() => setCurrentRange(range)}
             />
             <div>
               <button

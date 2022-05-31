@@ -3,7 +3,7 @@ import { useCommentsContext } from '../context';
 import { CommentProps } from './types';
 import './index.scss';
 
-const CommentElement: React.FC<CommentProps> = ({ comment: { 'comment-content': content, range, field } }) => {
+const CommentElement: React.FC<CommentProps> = ({ comment: { 'comment-content': content, range, field, author } }) => {
   const baseName = 'comment';
   const { state, dispatch } = useCommentsContext();
   const highlightRange = () => {
@@ -26,6 +26,8 @@ const CommentElement: React.FC<CommentProps> = ({ comment: { 'comment-content': 
       }}
     >
       {content}
+      <br />
+      {author && (<span className={`${baseName}__byline`}>{author}</span>)}
     </div>
   );
 };

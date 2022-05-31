@@ -8,6 +8,7 @@ import { CommentsProp, Comment } from './types';
 
 import './index.scss';
 import Button from '../../elements/Button';
+import { useAuth } from '../../utilities/Auth';
 
 const renderComment = (comment: Comment) => (
   <CommentElement
@@ -28,6 +29,7 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
     dispatch,
     reloadComments,
   } = useCommentsContext();
+  const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { serverURL, routes: { api } } = useConfig();
@@ -52,6 +54,7 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
         field: comment.field,
         'comment-content': comment['comment-content'],
         range: slateToPayloadRange(comment.range),
+        author: comment.author,
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -82,6 +85,7 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
       field: state.selectedField,
       'comment-content': state.text,
       range: state.selectedRange,
+      author: user.email,
     };
 
     saveComment(comment);

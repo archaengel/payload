@@ -1,18 +1,12 @@
 import React from 'react';
 import { CommentsAction } from './actions';
-import { CommentsState } from './reducer';
 
-interface Store {
-  dispatch: React.Dispatch<CommentsAction>
-  state: CommentsState
-}
+export type Thunk = (dispatch: React.Dispatch<CommentsAction>) => void
 
-type Thunk = (dispatch: React.Dispatch<CommentsAction>) => void
-
-export const thunk = (store: Store) => (next: React.Dispatch<CommentsAction>) => (action: CommentsAction | Thunk) => {
+export const thunkMiddleware = (dispatch: React.Dispatch<CommentsAction>) => (action: CommentsAction | Thunk) => {
   if (typeof action === 'function') {
-    return action(store.dispatch);
+    return action(dispatch);
   }
 
-  return next(action);
+  return dispatch(action);
 };

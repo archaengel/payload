@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
 import { useConfig } from '../../../utilities/Config';
@@ -32,6 +32,7 @@ import { getNextStage } from '../../../utilities/Workflow';
 import './index.scss';
 import { post } from '../../../../../workflows/baseFields';
 import CommentsView from '../../Comments';
+import { useCommentsContext } from '../../Comments/context';
 
 const baseClass = 'collection-edit';
 
@@ -39,6 +40,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
+  const { dispatch, reloadComments } = useCommentsContext();
 
   const {
     collection,
@@ -78,6 +80,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
     baseClass,
     isEditing && `${baseClass}--is-editing`,
   ].filter(Boolean).join(' ');
+
+  useEffect(() => {
+    dispatch(reloadComments());
+  }, [dispatch, reloadComments]);
 
   const operation = isEditing ? 'update' : 'create';
 

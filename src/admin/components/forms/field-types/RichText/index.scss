@@ -8,6 +8,10 @@
     background-color: $color-green;
   }
 
+  &__loaded {
+    background-color: $color-light-gray;
+  }
+
   &__toolbar {
     @include blur-bg(white);
     display: flex;

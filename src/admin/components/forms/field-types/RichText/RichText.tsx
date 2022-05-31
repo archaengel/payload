@@ -25,6 +25,7 @@ import withEnterBreakOut from './plugins/withEnterBreakOut';
 
 import './index.scss';
 import { useCommentsContext } from '../../../views/Comments/context';
+import { Comment } from '../../../views/Comments/types'
 
 const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'indent', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
@@ -94,18 +95,21 @@ const RichText: React.FC<Props> = (props) => {
     return <div {...attributes}>{children}</div>;
   }, [enabledElements, path, props]);
 
-  const { setFieldName, setRange, currentRange, setIsEditing: setIsEditingComment } = useCommentsContext();
+  const { state, dispatch } = useCommentsContext();
 
   const addComment = (fieldName: string) => (e) => {
     e.preventDefault();
-    setFieldName(fieldName);
-    setIsEditingComment(true);
+    console.log('selectedRange', state.selectedRange);
+    dispatch({
+      type: 'OPEN_COMMENT',
+      field: fieldName,
+      range: state.selectedRange,
+    });
   };
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
 
-    console.log('leaf.highlighted:', leaf.highlighted);
     if (enabledLeaves[matchedLeafName]?.Leaf) {
       const { Leaf } = enabledLeaves[matchedLeafName];
 
@@ -125,7 +129,7 @@ const RichText: React.FC<Props> = (props) => {
     return (
       <span
         {...attributes}
-        style={leaf.highlighted ? { background: `${baseClass}__highlight` } : {}}
+        className={leaf.loaded || leaf.highlighted ? `${baseClass}__${leaf.highlighted ? 'highlight' : 'loaded'}` : ''}
       >
         {children}
       </span>
@@ -179,34 +183,33 @@ const RichText: React.FC<Props> = (props) => {
     editor.blurSelection = editor.selection;
   }, [editor]);
 
-  useEffect(() => {
-    if (currentRange) {
-      Transforms.select(editor, currentRange);
-      ReactEditor.focus(editor);
-      console.dir(currentRange);
-    }
-  }, [editor, currentRange]);
-
-  // TODO(archaengel): Looks like this is higlighting entire ranges if they intersect, not only the
-  // range from the selected comment. We should rigure out how to massage the ranges to correct this.
   const decorate = useCallback(([node, nodePath]: NodeEntry): Range[] => {
-    if (Text.isText(node) && currentRange != null) {
-      const intersection = Range.intersection(currentRange, Editor.range(editor, nodePath));
+    const ranges = [];
+    const decorateIntersecting = (currentRange: Range, decoration: string): void => {
+      if (Text.isText(node) && currentRange != null) {
+        const intersection = Range.intersection(currentRange, Editor.range(editor, nodePath));
 
-      if (intersection == null) {
-        return [];
+        if (intersection == null) {
+          return;
+        }
+
+        const range = {
+          [decoration]: true,
+          ...intersection,
+        };
+
+        ranges.push(range);
       }
+    };
 
-      const range = {
-        highlighted: true,
-        ...intersection,
-      };
-
-      return [range];
+    if (state.selectedField === name) {
+      decorateIntersecting(state.selectedRange, 'highlighted');
     }
-
-    return [];
-  }, [currentRange, editor]);
+    state.comments
+      .filter(({ field }: Comment) => field === name)
+      .forEach(({ range }: Comment) => decorateIntersecting(range, 'loaded'));
+    return ranges;
+  }, [state.selectedRange, state.comments, state.selectedField, editor, name]);
 
   useEffect(() => {
     if (!loaded) {
@@ -322,6 +325,7 @@ const RichText: React.FC<Props> = (props) => {
                 spellCheck
                 readOnly={readOnly}
                 onBlur={onBlur}
+                onFocus={() => dispatch({ type: 'FOCUS_FIELD', field: name })}
                 decorate={decorate}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -376,9 +380,10 @@ const RichText: React.FC<Props> = (props) => {
                 }}
                 onSelect={() => {
                   const range = editor.selection;
-                  if (!Range.isCollapsed(range)) {
-                    setRange(range);
-                    console.log('onSelect:', range);
+                  if (Range.isExpanded(range)) {
+                    dispatch({ type: 'UPDATE_RANGE', range });
+                  } else if (!state.isEditing) {
+                    dispatch({ type: 'UPDATE_RANGE', range: null });
                   }
                 }}
               />
@@ -389,12 +394,6 @@ const RichText: React.FC<Props> = (props) => {
           value={value}
           description={description}
         />
-        <button
-          type="button"
-          onClick={addComment(name)}
-        >
-          + Comments
-        </button>
       </div>
     </div>
   );

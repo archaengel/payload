@@ -47,9 +47,20 @@ interface SucceedLoadComments {
   comments: Comment[]
 }
 
-interface HighlightComment {
-  type: 'HIGHLIGHT_COMMENT'
+interface UpdateRange {
+  type: 'UPDATE_RANGE'
   range: Range
+}
+
+interface HighlightText {
+  type: 'HIGHLIGHT_TEXT'
+  range: Range
+  field: string
+}
+
+interface FocusField {
+  type: 'FOCUS_FIELD'
+  field: string
 }
 
 export type CommentsAction =
@@ -63,4 +74,6 @@ export type CommentsAction =
   | AttemptLoadComments
   | FailLoadComments
   | SucceedLoadComments
-  | HighlightComment
+  | UpdateRange
+  | HighlightText
+  | FocusField

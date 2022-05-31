@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { Range } from 'slate';
 import { requests } from '../../../api';
 import { useConfig } from '../../utilities/Config';
 import CommentElement from './CommentElement';
 import { useCommentsContext } from './context';
 import { CommentsProp, Comment } from './types';
+
+import './index.scss';
+import Button from '../../elements/Button';
 
 const renderComment = (comment: Comment) => (
   <CommentElement
@@ -18,15 +21,14 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
     contentId,
   } = props;
 
+  const baseName = 'comments';
+
   const {
-    comments,
-    isEditing,
-    setIsEditing,
-    fieldName: field,
+    state,
+    dispatch,
     reloadComments,
-    range,
-    setCurrentRange,
   } = useCommentsContext();
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { serverURL, routes: { api } } = useConfig();
 
@@ -55,31 +57,34 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
         'Content-Type': 'application/json',
       },
     });
-  }, [serverURL, api]);
+    dispatch({ type: 'SUCCEED_SAVE_COMMENT' });
+    dispatch(reloadComments());
+  }, [dispatch, serverURL, api, reloadComments]);
 
   useEffect(() => {
-    reloadComments();
-  }, [reloadComments]);
+    dispatch(reloadComments());
+  }, [dispatch, reloadComments]);
 
-  const [content, setContent] = useState('');
+  useEffect(() => {
+    if (state.isEditing) {
+      inputRef.current.focus();
+    }
+  }, [state.isEditing]);
 
   const resetState = () => {
-    setIsEditing(false);
-    setContent('');
+    dispatch({ type: 'CANCEL_COMMENT' });
   };
 
   const handleSave = (evt) => {
     evt.preventDefault();
     const comment = {
       'content-id': contentId,
-      field,
-      'comment-content': content,
-      range,
+      field: state.selectedField,
+      'comment-content': state.text,
+      range: state.selectedRange,
     };
 
     saveComment(comment);
-    reloadComments();
-    resetState();
   };
 
   const handleCancel = (evt) => {
@@ -87,36 +92,65 @@ const CommentsView: React.FC<CommentsProp> = (props) => {
     resetState();
   };
 
+  const openComment = (e) => {
+    e.preventDefault();
+    dispatch({
+      type: 'OPEN_COMMENT',
+      field: state.selectedField,
+      range: state.selectedRange,
+    });
+  };
+
   return (
-    <ul>
-      {comments.map(renderComment)}
-      {isEditing
+    <div className={`${baseName}`}>
+      <div className={`${baseName}__list`}>
+        {state.comments.map(renderComment)}
+      </div>
+      {state.selectedRange && !state.isEditing
         ? (
-          <li>
+          <Button
+            icon="plus"
+            buttonStyle="icon-label"
+            iconPosition="left"
+            iconStyle="with-border"
+            onClick={openComment}
+          >
+            Comment
+          </Button>
+        )
+        : null}
+      {state.isEditing
+        ? (
+          <React.Fragment>
             <input
+              ref={inputRef}
               placeholder="Enter comment..."
-              value={content}
-              onChange={((e) => setContent(e.target.value))}
-              onFocus={() => setCurrentRange(range)}
+              value={state.text ?? ''}
+              onChange={(e) => dispatch({ type: 'UPDATE_COMMENT', text: e.target.value })}
+              onFocus={() => dispatch({ type: 'UPDATE_RANGE', range: state.selectedRange })}
             />
-            <div>
-              <button
+            <div className={`${baseName}__tray`}>
+              <Button
+                buttonStyle="secondary"
+                size="small"
                 type="button"
                 onClick={handleCancel}
               >
                 cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                buttonStyle="primary"
+                size="small"
                 type="submit"
                 onClick={handleSave}
               >
                 save
-              </button>
+              </Button>
             </div>
-          </li>
+          </React.Fragment>
         )
         : null}
-    </ul>
+    </div>
   );
 };
 

@@ -3,6 +3,7 @@ import { CollectionPermission } from '../../../../../auth/types';
 import { Document } from '../../../../../types';
 import { Fields } from '../../../forms/Form/types';
 import { Stage } from '../../../utilities/Workflow';
+import { Comment } from '../../Comments/types';
 
 export type IndexProps = {
   collection: SanitizedCollectionConfig
@@ -21,6 +22,6 @@ export type Props = IndexProps & {
   hasStagePermission: boolean
   hasWorkflow: boolean
   autosaveEnabled: boolean
-  workflowStages: Stage[];
-  currentStage?: string;
+  workflowStages: Stage[]
+  currentStage?: string
 }

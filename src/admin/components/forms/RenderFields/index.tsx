@@ -19,6 +19,8 @@ const RenderFields: React.FC<Props> = (props) => {
     permissions,
     readOnly: readOnlyOverride,
     className,
+    addComment,
+    setIsEditingComment,
   } = props;
 
   const [hasRendered, setHasRendered] = useState(false);
@@ -28,6 +30,7 @@ const RenderFields: React.FC<Props> = (props) => {
   const isIntersecting = Boolean(entry?.isIntersecting);
   const isAboveViewport = entry?.boundingClientRect?.top < 0;
   const shouldRender = isIntersecting || isAboveViewport;
+
 
 
   useEffect(() => {
@@ -95,6 +98,7 @@ const RenderFields: React.FC<Props> = (props) => {
                             readOnly,
                           },
                           permissions: fieldPermissions,
+                          addComment
                         }}
                       />
                     );

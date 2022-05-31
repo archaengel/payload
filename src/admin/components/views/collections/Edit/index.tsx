@@ -15,6 +15,7 @@ import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Stage } from '../../../utilities/Workflow';
+import { CommentsProvider } from '../../Comments/context';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -63,22 +64,23 @@ const EditView: React.FC<IndexProps> = (props) => {
   );
 
   const [{ data: collectionsMetaData }] = usePayloadAPI(
-     (isEditing ? `${serverURL}${api}/globals/collectionsMeta` : null),
+    (isEditing ? `${serverURL}${api}/globals/collectionsMeta` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 1, draft: 'true' } },
   );
 
-  const collectionMeta = collectionsMetaData[slug]
-  const hasWorkflow = collectionMeta !== null && collectionMeta !== undefined
-  const collectionStages = hasWorkflow ? collectionMeta.value?.stages : []
+  const collectionMeta = collectionsMetaData[slug];
+  const hasWorkflow = collectionMeta !== null && collectionMeta !== undefined;
+  const collectionStages = hasWorkflow ? collectionMeta.value?.stages : [];
 
   const [{ data: userData }] = usePayloadAPI(
-     (isEditing ? `${serverURL}${api}/admins/${user.id}` : null),
+    (isEditing ? `${serverURL}${api}/admins/${user.id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
 
-  const {roles: userRoles = []} = userData
+  const { roles: userRoles = [] } = userData;
 
   const dataToRender = (locationState as Record<string, unknown>)?.data || data;
+
 
   useEffect(() => {
     const nav: StepNavItem[] = [{
@@ -133,44 +135,45 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const getCurrentStage = (): Stage | null => {
     if (collectionStages.length === 0) {
-      return null
+      return null;
     }
 
-    const currentStageIndex = collectionStages.findIndex(({stage}: Stage) => stage.name === data["_workflow_stage"])
+    const currentStageIndex = collectionStages.findIndex(({ stage }: Stage) => stage.name === data._workflow_stage);
 
-    return collectionStages[currentStageIndex] || null
-  }
-
+    return collectionStages[currentStageIndex] || null;
+  };
 
   const currentStage = getCurrentStage();
   const collectionPermissions = permissions?.collections?.[slug];
   const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
-  const hasStagePermission = !collection.workflow || userRoles.some((role: string) => role === currentStage?.stage?.approver || role === 'admin')
+  const hasStagePermission = !collection.workflow || userRoles.some((role: string) => role === currentStage?.stage?.approver || role === 'admin');
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
 
   return (
     <NegativeFieldGutterProvider allow>
-      <RenderCustomComponent
-        DefaultComponent={DefaultEdit}
-        CustomComponent={CustomEdit}
-        componentProps={{
-          isLoading,
-          data: dataToRender,
-          collection,
-          permissions: collectionPermissions,
-          isEditing,
-          onSave,
-          initialState,
-          hasStagePermission,
-          hasSavePermission,
-          hasWorkflow,
-          apiURL,
-          action,
-          workflowStages: collectionStages,
-          currentStage: data["_workflow_stage"],
-        }}
-      />
+      <CommentsProvider>
+        <RenderCustomComponent
+          DefaultComponent={DefaultEdit}
+          CustomComponent={CustomEdit}
+          componentProps={{
+            isLoading,
+            data: dataToRender,
+            collection,
+            permissions: collectionPermissions,
+            isEditing,
+            onSave,
+            initialState,
+            hasStagePermission,
+            hasSavePermission,
+            hasWorkflow,
+            apiURL,
+            action,
+            workflowStages: collectionStages,
+            currentStage: data._workflow_stage,
+          }}
+        />
+      </CommentsProvider>
     </NegativeFieldGutterProvider>
   );
 };

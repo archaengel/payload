@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
 import { useConfig } from '../../../utilities/Config';
@@ -31,6 +31,7 @@ import { getNextStage } from '../../../utilities/Workflow';
 
 import './index.scss';
 import { post } from '../../../../../workflows/baseFields';
+import CommentsView from '../../Comments';
 
 const baseClass = 'collection-edit';
 
@@ -79,6 +80,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const operation = isEditing ? 'update' : 'create';
+
 
   return (
     <div className={classes}>
@@ -172,14 +174,18 @@ const DefaultEditView: React.FC<Props> = (props) => {
                             <SaveDraft />
                           )}
                             {collection.workflow && nextStage !== post
-                              ? <Promote
+                              ? (
+                                <Promote
                                   hasWorkflow={hasWorkflow}
                                   hasStagePermission={hasStagePermission}
                                   nextStage={nextStage}
                                 />
-                              : <Publish
+                              )
+                              : (
+                                <Publish
                                   workflowManaged
-                                />}
+                                />
+                              )}
                         </React.Fragment>
                       )}
                       {!collection.versions?.drafts && (
@@ -215,6 +221,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       fieldSchema={fields}
                     />
                   </div>
+                  <CommentsView
+                    contentId={id}
+                  />
                   {isEditing && (
                   <ul className={`${baseClass}__meta`}>
                     {!hideAPIURL && (

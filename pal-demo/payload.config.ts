@@ -6,6 +6,7 @@ import Workflows from './globals/Workflows';
 
 import { Logo } from './components/Logo';
 import { Icon } from './components/Icon';
+import Comments from './collections/Comments';
 
 export default buildConfig({
   // By default, Payload will boot up normally
@@ -15,6 +16,7 @@ export default buildConfig({
   collections: [
     Admin,
     PublicUser,
+    Comments,
     {
       slug: 'pages',
       fields: [
@@ -30,7 +32,7 @@ export default buildConfig({
       workflow: true,
     },
     {
-      slug: 'articles',
+      slug: 'posts',
       fields: [
         {
           name: 'title',
@@ -39,7 +41,7 @@ export default buildConfig({
         },
         {
           name: 'body',
-          type: 'text',
+          type: 'richText',
           required: true,
         },
       ],

@@ -13,6 +13,10 @@ const Comments: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'author',
+      type: 'text',
+    },
+    {
       name: 'range',
       type: 'group',
       fields: [

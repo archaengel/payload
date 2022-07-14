@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, Range } from 'slate';
+import { createEditor, Transforms, Node, NodeEntry, Element as SlateElement, Text, BaseEditor, Range, Editor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
@@ -25,6 +25,7 @@ import withEnterBreakOut from './plugins/withEnterBreakOut';
 
 import './index.scss';
 import { useCommentsContext } from '../../../views/Comments/context';
+import { Comment } from '../../../views/Comments/types'
 
 const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'indent', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
@@ -94,15 +95,17 @@ const RichText: React.FC<Props> = (props) => {
     return <div {...attributes}>{children}</div>;
   }, [enabledElements, path, props]);
 
-
-  const { setFieldName, setRange, setIsEditing: setIsEditingComment } = useCommentsContext();
+  const { state, dispatch } = useCommentsContext();
 
   const addComment = (fieldName: string) => (e) => {
     e.preventDefault();
-    setFieldName(fieldName);
-    setIsEditingComment(true);
+    console.log('selectedRange', state.selectedRange);
+    dispatch({
+      type: 'OPEN_COMMENT',
+      field: fieldName,
+      range: state.selectedRange,
+    });
   };
-
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
@@ -124,7 +127,12 @@ const RichText: React.FC<Props> = (props) => {
     }
 
     return (
-      <span {...attributes}>{children}</span>
+      <span
+        {...attributes}
+        className={leaf.loaded || leaf.highlighted ? `${baseClass}__${leaf.highlighted ? 'highlight' : 'loaded'}` : ''}
+      >
+        {children}
+      </span>
     );
   }, [enabledLeaves, path, props]);
 
@@ -174,6 +182,34 @@ const RichText: React.FC<Props> = (props) => {
   const onBlur = useCallback(() => {
     editor.blurSelection = editor.selection;
   }, [editor]);
+
+  const decorate = useCallback(([node, nodePath]: NodeEntry): Range[] => {
+    const ranges = [];
+    const decorateIntersecting = (currentRange: Range, decoration: string): void => {
+      if (Text.isText(node) && currentRange != null) {
+        const intersection = Range.intersection(currentRange, Editor.range(editor, nodePath));
+
+        if (intersection == null) {
+          return;
+        }
+
+        const range = {
+          [decoration]: true,
+          ...intersection,
+        };
+
+        ranges.push(range);
+      }
+    };
+
+    if (state.selectedField === name) {
+      decorateIntersecting(state.selectedRange, 'highlighted');
+    }
+    state.comments
+      .filter(({ field }: Comment) => field === name)
+      .forEach(({ range }: Comment) => decorateIntersecting(range, 'loaded'));
+    return ranges;
+  }, [state.selectedRange, state.comments, state.selectedField, editor, name]);
 
   useEffect(() => {
     if (!loaded) {
@@ -289,6 +325,8 @@ const RichText: React.FC<Props> = (props) => {
                 spellCheck
                 readOnly={readOnly}
                 onBlur={onBlur}
+                onFocus={() => dispatch({ type: 'FOCUS_FIELD', field: name })}
+                decorate={decorate}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     if (event.shiftKey) {
@@ -342,9 +380,10 @@ const RichText: React.FC<Props> = (props) => {
                 }}
                 onSelect={() => {
                   const range = editor.selection;
-                  if (!Range.isCollapsed(range)) {
-                    setRange(range);
-                    console.log(range);
+                  if (Range.isExpanded(range)) {
+                    dispatch({ type: 'UPDATE_RANGE', range });
+                  } else if (!state.isEditing) {
+                    dispatch({ type: 'UPDATE_RANGE', range: null });
                   }
                 }}
               />
@@ -355,12 +394,6 @@ const RichText: React.FC<Props> = (props) => {
           value={value}
           description={description}
         />
-        <button
-          type="button"
-          onClick={addComment(name)}
-        >
-          + Comments
-        </button>
       </div>
     </div>
   );

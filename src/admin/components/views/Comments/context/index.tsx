@@ -1,23 +1,14 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useReducer, useMemo} from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import queryString from 'qs';
-import { Range } from 'slate';
 import { requests } from '../../../../api';
 import { useConfig } from '../../../utilities/Config';
-import { Comment } from '../types';
-
-
-type UpdateFn<T> = (t: T) => void
+import { CommentsAction, commentsReducer, CommentsState, initCommentsState, Thunk, thunkMiddleware } from './reducer';
 
 interface Context {
-    comments: Comment[]
-    range: Range | null
-    setRange: UpdateFn<Range | null>
-    isEditing: boolean
-    setIsEditing: UpdateFn<boolean>
-    fieldName: string
-    setFieldName: UpdateFn<string>
-    reloadComments: () => void
+  state: CommentsState,
+  dispatch: React.Dispatch<CommentsAction | Thunk>
+  reloadComments: () => (dispatch: React.Dispatch<CommentsAction>) => Promise<void>
 }
 
 const CommentsContext = createContext({} as Context);
@@ -25,22 +16,39 @@ const CommentsContext = createContext({} as Context);
 export const useCommentsContext = () => useContext(CommentsContext);
 
 export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [fieldName, setFieldName] = useState('');
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [range, setRange] = useState<Range | null>(null);
-  const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [state, commentsDispatch] = useReducer(commentsReducer, initCommentsState);
   const { serverURL, routes: { api } } = useConfig();
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
 
 
-  const reloadComments = useCallback(async () => {
+  const reloadComments = useCallback(() => async (dispatch: React.Dispatch<CommentsAction>) => {
     const commentQuery = {
       'content-id': {
         equals: id,
       },
+    };
+    if (!id) {
+      // The currently viewed content may be new and therefore not have an id.
+      // Load empty array of comments instead.
+      dispatch({ type: 'SUCCEED_LOAD_COMMENTS', comments: [] });
+      return;
+    }
+    const unwrap = ({ index }: {index: number}) => index;
+    const dbRangeToSlateRange = (dbRange) => ({
+      anchor: {
+        ...dbRange.anchor,
+        path: dbRange.anchor.path.map(unwrap),
+      },
+      focus: {
+        ...dbRange.focus,
+        path: dbRange.focus.path.map(unwrap),
+      },
+    });
+    const dbCommentToSlate = (dbComment) => {
+      return {
+        ...dbComment,
+        range: dbRangeToSlateRange(dbComment.range),
+      };
     };
     const url = `${serverURL}${api}/comments`;
     const search = queryString.stringify({
@@ -49,35 +57,28 @@ export const CommentsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const response = await requests.get(`${url}?${search}`);
 
-      if (response.status > 201) {
-        setIsError(true);
-      }
+      // if (response.status > 201) {
+        // setIsError(true);
+      // }
 
       const json = await response.json();
-      setComments(json.docs ?? []);
+      const comments = json.docs ? json.docs.map(dbCommentToSlate) : [];
+      dispatch({ type: 'SUCCEED_LOAD_COMMENTS', comments });
 
-      console.log(json);
-      setIsLoading(false);
+      // setIsLoading(false);
     } catch (error) {
-      console.log(error);
-      setIsError(true);
-      setIsLoading(false);
+      // setIsError(true);
+      // setIsLoading(false);
     }
-
-    console.log(api, serverURL, commentQuery);
   }, [api, serverURL, id]);
 
-  console.log(comments);
+  const enhancedDispatch = useMemo(() => thunkMiddleware(commentsDispatch), [commentsDispatch]);
+
 
   return (
     <CommentsContext.Provider value={{
-      comments,
-      range,
-      setRange,
-      isEditing,
-      setIsEditing,
-      fieldName,
-      setFieldName,
+      state,
+      dispatch: enhancedDispatch,
       reloadComments,
     }}
     >

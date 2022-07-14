@@ -25,6 +25,16 @@ export default buildConfig({
           type: 'text',
           required: true,
         },
+        {
+          name: 'first body',
+          type: 'richText',
+          required: true,
+        },
+        {
+          name: 'second body',
+          type: 'richText',
+          required: true,
+        },
       ],
       versions: {
         drafts: true,

@@ -99,7 +99,6 @@ const RichText: React.FC<Props> = (props) => {
 
   const addComment = (fieldName: string) => (e) => {
     e.preventDefault();
-    console.log('selectedRange', state.selectedRange);
     dispatch({
       type: 'OPEN_COMMENT',
       field: fieldName,
